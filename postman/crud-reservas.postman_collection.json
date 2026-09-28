@@ -1,0 +1,147 @@
+{
+  "info": {
+    "name": "Lab 3 - CRUD Reservas (Serverless)",
+    "description": "Pruebas del CRUD de reservas. Cambiar la variable baseUrl entre local (http://localhost:3000) y la URL de AWS.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "id", "value": "" },
+    { "key": "idInexistente", "value": "00000000-0000-0000-0000-000000000000" }
+  ],
+  "item": [
+    {
+      "name": "Casos exitosos",
+      "item": [
+        {
+          "name": "1. Crear reserva (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('id', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": \"Daniela Vela\",\n  \"servicio\": \"Mesa terraza\",\n  \"fecha\": \"2026-10-15\",\n  \"hora\": \"19:30\",\n  \"personas\": 4\n}"
+            },
+            "url": "{{baseUrl}}/reservas"
+          }
+        },
+        {
+          "name": "2. Listar reservas (200)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/reservas" }
+        },
+        {
+          "name": "3. Obtener reserva (200)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/reservas/{{id}}" }
+        },
+        {
+          "name": "4. Actualizar reserva (200)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Estado confirmado', () => pm.expect(pm.response.json().estado).to.eql('confirmada'));"] } }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": \"Daniela Vela\",\n  \"servicio\": \"Mesa terraza\",\n  \"fecha\": \"2026-10-15\",\n  \"hora\": \"20:00\",\n  \"personas\": 6,\n  \"estado\": \"confirmada\"\n}"
+            },
+            "url": "{{baseUrl}}/reservas/{{id}}"
+          }
+        },
+        {
+          "name": "5. Eliminar reserva (200)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }
+          ],
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/reservas/{{id}}" }
+        }
+      ]
+    },
+    {
+      "name": "Casos de error",
+      "item": [
+        {
+          "name": "Crear sin campos obligatorios (400)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"cliente\": \"Sin datos\"\n}" },
+            "url": "{{baseUrl}}/reservas"
+          }
+        },
+        {
+          "name": "Crear con JSON inválido (400)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ esto no es json" },
+            "url": "{{baseUrl}}/reservas"
+          }
+        },
+        {
+          "name": "Crear con personas negativo (400)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"cliente\": \"Ana\",\n  \"servicio\": \"Barra\",\n  \"fecha\": \"2026-10-15\",\n  \"hora\": \"19:30\",\n  \"personas\": -2\n}" },
+            "url": "{{baseUrl}}/reservas"
+          }
+        },
+        {
+          "name": "Obtener id inexistente (404)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/reservas/{{idInexistente}}" }
+        },
+        {
+          "name": "Actualizar id inexistente (404)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"cliente\": \"Ana\",\n  \"servicio\": \"Barra\",\n  \"fecha\": \"2026-10-15\",\n  \"hora\": \"19:30\",\n  \"personas\": 2\n}" },
+            "url": "{{baseUrl}}/reservas/{{idInexistente}}"
+          }
+        },
+        {
+          "name": "Eliminar id inexistente (404)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }
+          ],
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/reservas/{{idInexistente}}" }
+        }
+      ]
+    }
+  ]
+}

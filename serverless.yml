@@ -1,0 +1,76 @@
+
+org: danielavela
+app: crud-reservas
+service: crud-reservas
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  architecture: arm64
+  region: us-east-1
+  environment:
+    RESERVAS_TABLE: ${self:service}-reservas-${sls:stage}
+  httpApi:
+    cors: true
+  iam:
+    role:
+      statements:
+        # Mínimo privilegio: solo las 5 acciones que usa el CRUD y solo sobre esta tabla
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [ReservasTable, Arn]
+
+functions:
+  crear:
+    handler: handler.crear
+    events:
+      - httpApi:
+          path: /reservas
+          method: post
+  listar:
+    handler: handler.listar
+    events:
+      - httpApi:
+          path: /reservas
+          method: get
+  obtener:
+    handler: handler.obtener
+    events:
+      - httpApi:
+          path: /reservas/{id}
+          method: get
+  actualizar:
+    handler: handler.actualizar
+    events:
+      - httpApi:
+          path: /reservas/{id}
+          method: put
+  eliminar:
+    handler: handler.eliminar
+    events:
+      - httpApi:
+          path: /reservas/{id}
+          method: delete
+
+resources:
+  Resources:
+    ReservasTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.RESERVAS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+plugins:
+  - serverless-offline

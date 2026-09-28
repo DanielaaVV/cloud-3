@@ -1,0 +1,21 @@
+{
+  "name": "crud-reservas",
+  "version": "1.0.0",
+  "description": "Laboratorio 3 Cloud Computing UdeA - CRUD serverless de reservas con AWS Lambda, API Gateway y DynamoDB",
+  "main": "handler.js",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "offline": "serverless offline",
+    "remove": "serverless remove"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0"
+  },
+  "devDependencies": {
+    "serverless-offline": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
